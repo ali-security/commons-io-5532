@@ -56,7 +56,7 @@ public class FileUtilsCleanDirectoryTestCase extends FileBasedTestCase {
         FileUtils.deleteDirectory(top);
     }
 
-    //-----------------------------------------------------------------------
+    // -----------------------------------------------------------------------
     public void testCleanEmpty() throws Exception {
         assertEquals(0, top.list().length);
 
@@ -91,7 +91,7 @@ public class FileUtilsCleanDirectoryTestCase extends FileBasedTestCase {
     }
 
     public void testThrowsOnNullList() throws Exception {
-        if (System.getProperty("os.name").startsWith("Win")  ||  !chmod(top, 0, false)) {
+        if (System.getProperty("os.name").startsWith("Win") || !chmod(top, 0, false)) {
             // test wont work if we can't restrict permissions on the
             // directory, so skip it.
             return;
@@ -110,7 +110,7 @@ public class FileUtilsCleanDirectoryTestCase extends FileBasedTestCase {
         final File file = new File(top, "restricted");
         FileUtils.touch(file);
 
-        if (System.getProperty("os.name").startsWith("Win")  ||  !chmod(top, 500, false)) {
+        if (System.getProperty("os.name").startsWith("Win") || !chmod(top, 500, false)) {
             // test wont work if we can't restrict permissions on the
             // directory, so skip it.
             return;
@@ -127,25 +127,24 @@ public class FileUtilsCleanDirectoryTestCase extends FileBasedTestCase {
 
     private boolean chmod(File file, int mode, boolean recurse)
             throws InterruptedException {
-        // TODO: Refactor this to FileSystemUtils
-        List<String> args = new ArrayList<String>();
-        args.add("chmod");
-
-        if (recurse) {
-            args.add("-R");
-        }
-
-        args.add(Integer.toString(mode));
-        args.add(file.getAbsolutePath());
-
         Process proc;
 
-        try {
-            proc = Runtime.getRuntime().exec(
-                    args.toArray(new String[args.size()]));
-        } catch (IOException e) {
-            return false;
+        if (recurse) {
+            try {
+                proc = Runtime.getRuntime().exec(
+                        new String[] { "chmod", "-R", Integer.toString(mode), file.getAbsolutePath() });
+            } catch (IOException e) {
+                return false;
+            }
+        } else {
+            try {
+                proc = Runtime.getRuntime().exec(
+                        new String[] { "chmod", "0", file.getAbsolutePath() });
+            } catch (IOException e) {
+                return false;
+            }
         }
+
         int result = proc.waitFor();
         return result == 0;
     }
